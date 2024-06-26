@@ -1,27 +1,31 @@
 {
   "expo": {
-    "name": "Recorder",
-    "slug": "Recorder",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+    "name": "NoiceBook",
+    "slug": "your-app-slug",
+    "version": "1.0.1",
+    "platforms": ["ios", "android"],
+    "android": {
+      "package": "com.yourcompany.yourapp",
+      "permissions": ["CAMERA", "RECORD_AUDIO", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
     },
     "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+      "bundleIdentifier": "com.yourcompany.yourapp",
+      "infoPlist": {
+        "UIBackgroundModes": ["audio", "fetch", "remote-notification"],
+        "NSCameraUsageDescription": "This app requires access to the camera.",
+        "NSMicrophoneUsageDescription": "This app requires access to the microphone."
       }
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "description": "Your app description",
+    "sdkVersion": "51.0.0",
+    "orientation": "portrait",
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
+    "notification": {
+      "icon": "./path/to/notification/icon.png",
+      "color": "#ffffff"
     }
   }
 }
