@@ -1,41 +1,75 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Button } from 'react-native';
+import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { Audio } from 'expo-av';
 
 const PlayAudio = ({ uri }) => {
-    const [sound, setSound] = useState();
-
-    async function playSound() {
-        console.log('Loading Sound');
-        const { sound } = await Audio.Sound.createAsync({ uri });
-        setSound(sound);
-
-        console.log('Playing Sound');
-        await sound.playAsync();
-    }
+    const [sound, setSound] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
 
     useEffect(() => {
         return sound
             ? () => {
-                console.log('Unloading Sound');
                 sound.unloadAsync();
             }
             : undefined;
     }, [sound]);
 
+    const playAudio = async () => {
+        try {
+            if (sound) {
+                await sound.unloadAsync();
+                setSound(null);
+                setIsPlaying(false);
+            } else {
+                const { sound: newSound } = await Audio.Sound.createAsync({ uri });
+                setSound(newSound);
+                await newSound.playAsync();
+                setIsPlaying(true);
+            }
+        } catch (error) {
+            console.log('Error playing audio:', error);
+        }
+    };
+
     return (
-        <View style={styles.container}>
-            <Button title="Play Sound" onPress={playSound} />
-        </View>
+        <TouchableOpacity style={styles.playButton} onPress={playAudio}>
+            <View style={[styles.triangle, isPlaying && styles.stopTriangle]} />
+        </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
+    playButton: {
+        width: 60,
+        height: 60,
+        borderRadius: 10,
+        backgroundColor: 'green',
+        alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#ecf0f1',
-        padding: 10,
+        marginLeft: 20,
+    },
+    triangle: {
+        width: 0,
+        height: 0,
+        borderLeftWidth: 10,
+        borderRightWidth: 10,
+        borderBottomWidth: 15,
+        borderStyle: 'solid',
+        backgroundColor: 'transparent',
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderBottomColor: 'white',
+        transform: [{ rotate: '90deg' }],
+    },
+    stopTriangle: {
+        width: 15,
+        height: 15,
+        borderLeftWidth: 5,
+        borderRightWidth: 5,
+        borderBottomWidth: 10,
+        borderStyle: 'solid',
+        backgroundColor: 'white',
+        transform: [{ rotate: '0deg' }],
     },
 });
 

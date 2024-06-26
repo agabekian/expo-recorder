@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "YourAppName",
+    "name": "NoiceBook",
     "slug": "your-app-slug",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "platforms": ["ios", "android"],
     "android": {
       "package": "com.yourcompany.yourapp",
