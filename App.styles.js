@@ -1,14 +1,28 @@
-import {StyleSheet} from "react-native";
+import { StyleSheet } from 'react-native';
 
-export const styles = StyleSheet.create({
+const baseStyles = {
     container: {
         flex: 1,
-        backgroundColor: '#ecf0f1',
-        padding: 20,
-        marginTop: 20
+        padding: 0,
+        marginTop: 30,
     },
-    darkContainer: {
-        backgroundColor: '#2c3e50',
+    topMenu: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+        width: '100%',
+        marginBottom: 10,
+    },
+    topMenuText: {
+        fontSize: 20,
+        fontWeight: '600',
+        fontFamily: 'Roboto',
+        color: 'white',
     },
     recordPlayContainer: {
         flexDirection: 'row',
@@ -16,19 +30,18 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
         marginTop: 20,
+        paddingLeft: 30,
     },
     buttonContainer: {
-        color: 'gray',
         borderRadius: 4,
         flexDirection: 'row',
         justifyContent: 'space-around',
         width: '100%',
-        marginTop: 20,
+        marginTop: 45,
     },
-    roundButton: {
+    button: {
         borderRightWidth: 2,
         borderBottomWidth: 2,
-        backgroundColor: '#f5f6f6',
         padding: 5,
         borderRadius: 10,
         alignItems: 'center',
@@ -36,13 +49,11 @@ export const styles = StyleSheet.create({
         width: 150,
     },
     buttonText: {
-        color: 'teal',
         fontSize: 16,
-        fontWeight: 'semibold',
+        fontWeight: '600',
         fontFamily: 'Roboto',
     },
-    lightReminder: {
-        display: 'flex',
+    reminder: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -50,47 +61,71 @@ export const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 5,
         borderWidth: 1,
-        borderColor: '#ccc',
         width: '100%',
     },
-    darkReminder: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 20,
-        padding: 10,
-        borderRadius: 5,
-        borderWidth: 1,
-        borderColor: 'white',
-        textDecorationColor: 'white',
-        width: '100%',
-        backgroundColor: '#34495e'
+    reminderText: {
+        fontSize: 16,
     },
-    scheduledTime: {
-        marginTop: 20,
-        fontSize: 18,
-        fontWeight: 'bold',
+    content: {
+        flex: 1,
+    },
+};
+
+export const lightStyles = StyleSheet.create({
+    ...baseStyles,
+    container: {
+        ...baseStyles.container,
+        backgroundColor: '#ffffff',
     },
     topMenu: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingTop: 40,
-
-        paddingBottom: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
+        ...baseStyles.topMenu,
         backgroundColor: '#5f8381',
-        width: '100%',
-        marginBottom: 10,
     },
-    topMenuText: {
-        fontSize: 20,
-        fontWeight: 'condensed',
-        fontFamily: 'Roboto',
-        color: 'white',
+    button: {
+        ...baseStyles.button,
+        backgroundColor: '#f5f6f6',
+    },
+    buttonText: {
+        ...baseStyles.buttonText,
+        color: 'black',
+    },
+    reminder: {
+        ...baseStyles.reminder,
+        borderColor: '#ccc',
+        backgroundColor: '#ffffff',
+    },
+    reminderText: {
+        ...baseStyles.reminderText,
+        color: 'black',
     },
 });
 
+export const darkStyles = StyleSheet.create({
+    ...baseStyles,
+    container: {
+        ...baseStyles.container,
+        backgroundColor: '#393b3d',
+    },
+    topMenu: {
+        ...baseStyles.topMenu,
+        backgroundColor: '#5f8381',
+    },
+    button: {
+        ...baseStyles.button,
+        backgroundColor: 'transparent',
+        borderColor: 'gray',
+    },
+    buttonText: {
+        ...baseStyles.buttonText,
+        color: 'white',
+    },
+    reminder: {
+        ...baseStyles.reminder,
+        borderColor: 'white',
+        backgroundColor: '#34495e',
+    },
+    reminderText: {
+        ...baseStyles.reminderText,
+        color: 'white',
+    },
+});

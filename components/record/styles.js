@@ -16,8 +16,8 @@ export const styles = StyleSheet.create({
         opacity: 0.5,
     },
     recordButtonInner: {
-        width: 33,
-        height: 33,
+        width: 22,
+        height: 22,
         borderRadius: 20,
         backgroundColor: 'red',
         alignItems: 'center',

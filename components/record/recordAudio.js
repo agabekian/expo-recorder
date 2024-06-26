@@ -1,7 +1,8 @@
+// RecordAudio.js
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { Audio } from 'expo-av';
-import {styles} from '../play/styles'
+import {styles} from "./styles";
 
 const RecordAudio = ({ onSave }) => {
     const [recording, setRecording] = useState();
@@ -46,12 +47,11 @@ const RecordAudio = ({ onSave }) => {
             style={[styles.recordButton, recording ? styles.recording : {}]}
             onPress={recording ? stopRecording : startRecording}
         >
-            <View style={styles.recordButtonInner}></View>
-            {/*rec button*/}
+            <View style={styles.recordButtonInner}>
+                {!recording && <View style={styles.circle} />}
+            </View>
         </TouchableOpacity>
     );
 };
-
-
 
 export default RecordAudio;
