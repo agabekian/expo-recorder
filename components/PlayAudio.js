@@ -7,11 +7,13 @@ const PlayAudio = ({ uri }) => {
     const [isPlaying, setIsPlaying] = useState(false);
 
     useEffect(() => {
-        return sound
-            ? () => {
-                sound.unloadAsync();
+        const unsubscribe = sound?.setOnPlaybackStatusUpdate(async (status) => {
+            if (status.didJustFinish) {
+                // Introduce a small delay for short audio
+                setTimeout(() => setIsPlaying(false), 100); // Adjust delay as needed
             }
-            : undefined;
+        });
+        return () => unsubscribe?.(); // Unsubscribe on unmount to avoid leaks
     }, [sound]);
 
     const playAudio = async () => {
