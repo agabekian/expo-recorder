@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, Switch } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, Text, FlatList, TouchableOpacity, Alert, Switch} from 'react-native';
 import * as Notifications from 'expo-notifications';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import RecordAudio from './components/record/recordAudio';
 import PlayAudio from './components/play/playAudio';
-import { ThemeProvider, useTheme } from './ThemeContext';
-import { lightStyles, darkStyles } from './App.styles';
-import { formatTime } from './util';
+import {ThemeProvider, useTheme} from './ThemeContext';
+import {lightStyles, darkStyles} from './App.styles';
+import {formatTime} from './util';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 Notifications.setNotificationHandler({
@@ -24,18 +24,21 @@ const AppContent = () => {
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [reminders, setReminders] = useState([]);
     const [notificationPermissionGranted, setNotificationPermissionGranted] = useState(false);
-    const { isDarkMode, toggleTheme } = useTheme();
+    const {isDarkMode, toggleTheme} = useTheme();
     const styles = isDarkMode ? darkStyles : lightStyles;
 
     useEffect(() => {
-        (async () => {
-            const { status } = await Notifications.requestPermissionsAsync();
+        // Request notification permissions on component mount
+        const requestNotificationPermissions = async () => {
+            const {status} = await Notifications.requestPermissionsAsync();
             if (status !== 'granted') {
                 Alert.alert('Permission not granted for notifications!');
             } else {
                 setNotificationPermissionGranted(true);
             }
-        })();
+        };
+
+        requestNotificationPermissions();
     }, []);
 
     useEffect(() => {
@@ -45,12 +48,6 @@ const AppContent = () => {
 
     const handleSaveRecording = async (uri) => {
         setReminderUri(uri);
-        // Save recorded URI to AsyncStorage
-        try {
-            await AsyncStorage.setItem('@stored_reminder_uris', JSON.stringify([...reminders, uri]));
-        } catch (error) {
-            console.error('Error saving reminder URI:', error);
-        }
     };
 
     const loadStoredReminders = async () => {
@@ -75,19 +72,19 @@ const AppContent = () => {
             return;
         }
 
-        const newReminder = { uri: reminderUri, time };
+        const newReminder = {uri: reminderUri, time};
         setReminders([...reminders, newReminder]);
 
         await Notifications.scheduleNotificationAsync({
             content: {
                 title: 'Reminder',
                 body: 'Tap to listen to your reminder',
-                data: { uri: reminderUri },
+                data: {uri: reminderUri},
             },
-            trigger: { date: time.getTime() },
+            trigger: {date: time},
         });
 
-        setReminderUri(null);
+        setReminderUri(null); // Reset reminder URI after scheduling
     };
 
     const showPicker = () => {
@@ -105,31 +102,23 @@ const AppContent = () => {
         const removedReminder = updatedReminders.splice(index, 1)[0];
         setReminders(updatedReminders);
 
-        // Assuming you store the reminders in AsyncStorage with a key 'reminders'
         try {
-            const storedReminders = await AsyncStorage.getItem('reminders');
-            if (storedReminders) {
-                const parsedReminders = JSON.parse(storedReminders);
-                const filteredReminders = parsedReminders.filter(
-                    (reminder) => reminder.uri !== removedReminder.uri
-                );
-                await AsyncStorage.setItem('reminders', JSON.stringify(filteredReminders));
-            }
+            await AsyncStorage.setItem('@stored_reminder_uris', JSON.stringify(updatedReminders));
         } catch (error) {
-            console.error('Failed to remove reminder from storage:', error);
+            console.error('Failed to update reminders in storage:', error);
         }
     };
 
-    const renderReminder = ({ item, index }) => (
+    const renderReminder = ({item, index}) => (
         <View style={styles.reminder}>
             <Text style={styles.reminderText}>{index + 1}. </Text>
             <Text style={styles.reminderText}>{formatTime(item.time)}</Text>
             <View style={styles.audioInfo}>
-                <PlayAudio uri={item.uri} />
+                <PlayAudio uri={item.uri}/>
             </View>
             <View style={styles.actions}>
                 <TouchableOpacity onPress={() => handleRemoveReminder(index)} style={styles.deleteButton}>
-                    <Ionicons name="close-circle" size={24} color="red" />
+                    <Ionicons name="close-circle" size={24} color="red"/>
                 </TouchableOpacity>
             </View>
         </View>
@@ -138,9 +127,9 @@ const AppContent = () => {
     return (
         <View style={styles.container}>
             <View style={styles.topMenu}>
-                <Text style={styles.topMenuText}>Voice <Ionicons name="checkmark-circle" size={32} color="white" /> Book</Text>
+                <Text style={styles.topMenuText}>Todayly <Ionicons name="checkmark-circle" size={32} color="white"/> </Text>
                 <Switch
-                    trackColor={{ false: "#3b3a3b", true: "#d6e5df" }}
+                    trackColor={{false: "#3b3a3b", true: "#d6e5df"}}
                     thumbColor={isDarkMode ? "#435b5b" : "#c6d0d0"}
                     ios_backgroundColor="#3e3e3e"
                     onValueChange={toggleTheme}
@@ -148,9 +137,29 @@ const AppContent = () => {
                 />
             </View>
             <View style={styles.content}>
-                <View style={styles.recordPlayContainer}>
-                    <RecordAudio onSave={handleSaveRecording} />
-                    {reminderUri && <PlayAudio uri={reminderUri} />}
+                <View style={styles.transport}>
+
+                    <View style={styles.buttonContainer}>
+                        <RecordAudio onSave={handleSaveRecording}/>
+                        <TouchableOpacity style={styles.button} onPress={showPicker}>
+                            <Text style={styles.buttonText}>Pick <Ionicons name="time-outline" size={24}
+                                                                           color="orange"/> Time</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {reminderUri && (
+                        <View style={styles.buttonContainer}>
+                            <Text style={styles.reminderText}>Recorded:</Text>
+                            <PlayAudio uri={reminderUri}/>
+                            <TouchableOpacity style={styles.button} onPress={handleScheduleReminder}>
+                                <Text style={styles.buttonText}><Ionicons name="add-outline" size={24} color="orange"/>Schedule
+                                    as reminder</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+
+                <View>
+
                 </View>
                 {showTimePicker && (
                     <DateTimePicker
@@ -161,21 +170,9 @@ const AppContent = () => {
                         onChange={onChange}
                     />
                 )}
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={showPicker}>
-                        <Text style={styles.buttonText}>Pick Time</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={handleScheduleReminder}>
-                        <Text style={styles.buttonText}>Schedule Reminder</Text>
-                    </TouchableOpacity>
-                </View>
-
                 <FlatList
-                    data={reminders.map((item, index) => ({
-                        ...item,
-                        key: index.toString(),
-                    }))}
-                    keyExtractor={(item) => item.key}
+                    data={reminders}
+                    keyExtractor={(item, index) => index.toString()}
                     renderItem={renderReminder}
                 />
             </View>
@@ -183,10 +180,12 @@ const AppContent = () => {
     );
 };
 
-export default function App() {
+const App = () => {
     return (
         <ThemeProvider>
-            <AppContent />
+            <AppContent/>
         </ThemeProvider>
     );
-}
+};
+
+export default App;
