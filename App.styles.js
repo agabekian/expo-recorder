@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from 'react-native';
 
 const baseStyles = {
     container: {
@@ -6,6 +6,7 @@ const baseStyles = {
         padding: 0,
         marginTop: 30,
     },
+
     topMenu: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -18,12 +19,14 @@ const baseStyles = {
         width: '100%',
         marginBottom: 10,
     },
+
     topMenuText: {
         fontSize: 20,
         fontWeight: '600',
         fontFamily: 'Roboto',
         color: 'white',
     },
+
     recordPlayContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -32,13 +35,16 @@ const baseStyles = {
         marginTop: 20,
         paddingLeft: 30,
     },
+
     buttonContainer: {
         borderRadius: 4,
         flexDirection: 'row',
         justifyContent: 'space-around',
         width: '100%',
         marginTop: 45,
+        marginBottom: 10,
     },
+
     button: {
         borderRightWidth: 2,
         borderBottomWidth: 2,
@@ -48,26 +54,29 @@ const baseStyles = {
         justifyContent: 'center',
         width: 150,
     },
+
     buttonText: {
         fontSize: 16,
         fontWeight: '600',
         fontFamily: 'Roboto',
     },
+
     reminder: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 20,
-        padding: 10,
+        justifyContent: 'space-between',
         borderRadius: 5,
         borderWidth: 1,
-        width: '100%',
+        borderColor: 'red',
+        padding:10
     },
+
     reminderText: {
-        fontSize: 16,
+        fontSize: 18,
     },
-    content: {
-        flex: 1,
+
+    deleteButton: {
+        marginLeft: 250, // Push delete button to the right
     },
 };
 
@@ -92,7 +101,7 @@ export const lightStyles = StyleSheet.create({
     reminder: {
         ...baseStyles.reminder,
         borderColor: '#ccc',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#f5f5f5',
     },
     reminderText: {
         ...baseStyles.reminderText,
@@ -128,4 +137,5 @@ export const darkStyles = StyleSheet.create({
         ...baseStyles.reminderText,
         color: 'white',
     },
+
 });

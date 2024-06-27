@@ -1,19 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { TouchableOpacity, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, StyleSheet, View, Text } from 'react-native';
 import { Audio } from 'expo-av';
 
 const PlayAudio = ({ uri }) => {
     const [sound, setSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [elapsedTime, setElapsedTime] = useState('00:00');
+    const [duration, setDuration] = useState('00:00');
 
     useEffect(() => {
-        const unsubscribe = sound?.setOnPlaybackStatusUpdate(async (status) => {
-            if (status.didJustFinish) {
-                // Introduce a small delay for short audio
-                setTimeout(() => setIsPlaying(false), 100); // Adjust delay as needed
+        const loadSound = async () => {
+            try {
+                const { sound } = await Audio.Sound.createAsync({ uri }, { shouldPlay: false });
+                setSound(sound);
+                const status = await sound.getStatusAsync();
+                setDuration(formatTime(status.durationMillis));
+            } catch (error) {
+                console.error('Failed to load sound', error);
             }
-        });
-        return () => unsubscribe?.(); // Unsubscribe on unmount to avoid leaks
+        };
+
+        loadSound();
+
+        return () => {
+            if (sound) {
+                sound.unloadAsync();
+            }
+        };
+    }, [uri]);
+
+    useEffect(() => {
+        const checkPlaybackStatus = async () => {
+            if (sound) {
+                const status = await sound.getStatusAsync();
+                if (status.isLoaded) {
+                    if (status.isPlaying) {
+                        setElapsedTime(formatTime(status.positionMillis));
+                    } else if (status.didJustFinish || status.positionMillis >= status.durationMillis) {
+                        setIsPlaying(false);
+                        await sound.unloadAsync();
+                        setSound(null);
+                        setElapsedTime('00:00');
+                    }
+                }
+            }
+        };
+
+        const interval = setInterval(checkPlaybackStatus, 500); // Check every 500ms
+        return () => clearInterval(interval);
     }, [sound]);
 
     const playAudio = async () => {
@@ -22,6 +56,7 @@ const PlayAudio = ({ uri }) => {
                 await sound.unloadAsync();
                 setSound(null);
                 setIsPlaying(false);
+                setElapsedTime('00:00');
             } else {
                 const { sound: newSound } = await Audio.Sound.createAsync({ uri });
                 setSound(newSound);
@@ -33,23 +68,31 @@ const PlayAudio = ({ uri }) => {
         }
     };
 
+    const formatTime = (millis) => {
+        const seconds = Math.floor(millis / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const formattedSeconds = seconds % 60;
+        return `${minutes}:${formattedSeconds < 10 ? '0' : ''}${formattedSeconds}`;
+    };
+
     return (
         <TouchableOpacity style={styles.playButton} onPress={playAudio}>
             <View style={[styles.triangle, isPlaying && styles.stopTriangle]} />
+            <Text style={styles.elapsedTime}>{isPlaying ? elapsedTime : duration}</Text>
         </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
     playButton: {
-        marginRight:300,
-        width: 60,
+        width: 90,
         height: 60,
         borderRadius: 10,
         backgroundColor: 'green',
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 20,
+        flexDirection: 'row',
+        paddingHorizontal: 10,
     },
     triangle: {
         width: 0,
@@ -63,16 +106,21 @@ const styles = StyleSheet.create({
         borderRightColor: 'transparent',
         borderBottomColor: 'white',
         transform: [{ rotate: '90deg' }],
+        marginRight: 10,
     },
     stopTriangle: {
-        width: 15,
-        height: 15,
-        borderLeftWidth: 5,
-        borderRightWidth: 5,
-        borderBottomWidth: 10,
-        borderStyle: 'solid',
+        width: 20,
+        height: 20,
         backgroundColor: 'white',
-        transform: [{ rotate: '0deg' }],
+        transform: [{ rotate: '45deg' }],
+    },
+    deleteButton: {
+        marginLeft: 'auto', // Push delete button to the right
+    },
+    elapsedTime: {
+        marginTop: 5,
+        color: 'white',
+        fontSize: 12,
     },
 });
 

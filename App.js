@@ -75,21 +75,34 @@ const AppContent = () => {
         setTime(currentTime);
     };
 
+    const handleRemoveReminder = (index) => {
+        const updatedReminders = [...reminders];
+        updatedReminders.splice(index, 1);
+        setReminders(updatedReminders);
+    };
+
     const renderReminder = ({ item, index }) => (
         <View style={styles.reminder}>
-            <Text style={styles.reminderText}>Reminder {index + 1}:</Text>
-            <Text style={styles.reminderText}>Time: {new Date(item.time).toLocaleTimeString()}</Text>
-            <PlayAudio uri={item.uri} />
+            <Text style={styles.reminderText}>{index + 1}. </Text>
+            <Text style={styles.reminderText}>{new Date(item.time).toLocaleTimeString()}</Text>
+            <View style={styles.audioInfo}>
+                <PlayAudio uri={item.uri} />
+            </View>
+            <View style={styles.actions}>
+                <TouchableOpacity onPress={() => handleRemoveReminder(index)} style={styles.deleteButton}>
+                    <Ionicons name="close-circle" size={24} color="red" />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 
     return (
         <View style={styles.container}>
             <View style={styles.topMenu}>
-                <Text style={styles.topMenuText}>voice <Ionicons name="checkmark-circle" size={32} color="white" /> book</Text>
+                <Text style={styles.topMenuText}>Voice <Ionicons name="checkmark-circle" size={32} color="white" /> Book</Text>
                 <Switch
-                    trackColor={{ false: "#767577", true: "#81b0ff" }}
-                    thumbColor={isDarkMode ? "#f5dd4b" : "#f4f3f4"}
+                    trackColor={{ false: "#3b3a3b", true: "#d6e5df" }}
+                    thumbColor={isDarkMode ? "#435b5b" : "#c6d0d0"}
                     ios_backgroundColor="#3e3e3e"
                     onValueChange={toggleTheme}
                     value={isDarkMode}
@@ -117,8 +130,11 @@ const AppContent = () => {
                         <Text style={styles.buttonText}>Schedule Reminder</Text>
                     </TouchableOpacity>
                 </View>
+
                 <FlatList
-                    data={reminders}
+                    data={reminders.map((item) => ({
+                        ...item,
+                    }))}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={renderReminder}
                 />
