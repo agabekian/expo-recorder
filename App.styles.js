@@ -68,15 +68,17 @@ const baseStyles = {
         borderRadius: 5,
         borderWidth: 1,
         borderColor: 'red',
-        padding:10
+        padding:10,
+        marginLeft: 5,
+        marginRight: 5,
     },
 
     reminderText: {
-        fontSize: 18,
+        fontSize: 16,
     },
 
     deleteButton: {
-        marginLeft: 250, // Push delete button to the right
+        marginLeft: 'auto', // Push delete button to the right
     },
 };
 
@@ -100,12 +102,12 @@ export const lightStyles = StyleSheet.create({
     },
     reminder: {
         ...baseStyles.reminder,
-        borderColor: '#ccc',
-        backgroundColor: '#f5f5f5',
+        borderColor: '#1c7530',
+        backgroundColor: '#e3e5e1',
     },
     reminderText: {
         ...baseStyles.reminderText,
-        color: 'black',
+        color: '#1C7530FF',
     },
 });
 

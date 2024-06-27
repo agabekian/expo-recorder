@@ -7,7 +7,7 @@ import RecordAudio from './components/record/recordAudio';
 import PlayAudio from './components/play/playAudio';
 import { ThemeProvider, useTheme } from './ThemeContext';
 import { lightStyles, darkStyles } from './App.styles';
-
+import { formatTime } from './util'; // Adjust the path as necessary
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
         shouldShowAlert: true,
@@ -84,7 +84,7 @@ const AppContent = () => {
     const renderReminder = ({ item, index }) => (
         <View style={styles.reminder}>
             <Text style={styles.reminderText}>{index + 1}. </Text>
-            <Text style={styles.reminderText}>{new Date(item.time).toLocaleTimeString()}</Text>
+            <Text style={styles.reminderText}>{formatTime(item.time)}</Text>
             <View style={styles.audioInfo}>
                 <PlayAudio uri={item.uri} />
             </View>

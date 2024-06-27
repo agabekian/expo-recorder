@@ -85,14 +85,13 @@ const PlayAudio = ({ uri }) => {
 
 const styles = StyleSheet.create({
     playButton: {
+        flexDirection: 'row',
         width: 90,
         height: 60,
         borderRadius: 10,
-        backgroundColor: 'green',
+        backgroundColor: '#50a965',
         alignItems: 'center',
         justifyContent: 'center',
-        flexDirection: 'row',
-        paddingHorizontal: 10,
     },
     triangle: {
         width: 0,
@@ -114,9 +113,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         transform: [{ rotate: '45deg' }],
     },
-    deleteButton: {
-        marginLeft: 'auto', // Push delete button to the right
-    },
+
     elapsedTime: {
         marginTop: 5,
         color: 'white',
