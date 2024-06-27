@@ -80,3 +80,4 @@ Toggle the switch at the top right corner to switch between dark and light theme
     
 - Displays reminder audio duration.
 - Counter as audio is played
+- Local storage for audio
