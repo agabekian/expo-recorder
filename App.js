@@ -1,11 +1,14 @@
-import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, Button, Alert, Text, FlatList, TouchableOpacity, Platform, Switch} from 'react-native';
-import RecordAudio from './components/RecordAudio';
-import PlayAudio from './components/PlayAudio';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Alert, Switch } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Ionicons from '@expo/vector-icons/Ionicons';
-
+import RecordAudio from './components/record/recordAudio';
+import PlayAudio from './components/play/playAudio';
+import { ThemeProvider, useTheme } from './ThemeContext';
+import { lightStyles, darkStyles } from './App.styles';
+import { formatTime } from './util';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -15,17 +18,18 @@ Notifications.setNotificationHandler({
     }),
 });
 
-export default function App() {
+const AppContent = () => {
     const [reminderUri, setReminderUri] = useState(null);
     const [time, setTime] = useState(new Date());
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [reminders, setReminders] = useState([]);
-    const [isDarkMode, setIsDarkMode] = useState(false);
     const [notificationPermissionGranted, setNotificationPermissionGranted] = useState(false);
+    const { isDarkMode, toggleTheme } = useTheme();
+    const styles = isDarkMode ? darkStyles : lightStyles;
 
     useEffect(() => {
         (async () => {
-            const {status} = await Notifications.requestPermissionsAsync();
+            const { status } = await Notifications.requestPermissionsAsync();
             if (status !== 'granted') {
                 Alert.alert('Permission not granted for notifications!');
             } else {
@@ -34,8 +38,31 @@ export default function App() {
         })();
     }, []);
 
-    const handleSaveRecording = (uri) => {
+    useEffect(() => {
+        // Load stored reminders from AsyncStorage on component mount
+        loadStoredReminders();
+    }, []);
+
+    const handleSaveRecording = async (uri) => {
         setReminderUri(uri);
+        // Save recorded URI to AsyncStorage
+        try {
+            await AsyncStorage.setItem('@stored_reminder_uris', JSON.stringify([...reminders, uri]));
+        } catch (error) {
+            console.error('Error saving reminder URI:', error);
+        }
+    };
+
+    const loadStoredReminders = async () => {
+        // Load stored reminders from AsyncStorage
+        try {
+            const storedURIs = await AsyncStorage.getItem('@stored_reminder_uris');
+            if (storedURIs !== null) {
+                setReminders(JSON.parse(storedURIs));
+            }
+        } catch (error) {
+            console.error('Error loading reminders:', error);
+        }
     };
 
     const handleScheduleReminder = async () => {
@@ -48,54 +75,82 @@ export default function App() {
             return;
         }
 
-        const newReminder = {uri: reminderUri, time};
+        const newReminder = { uri: reminderUri, time };
         setReminders([...reminders, newReminder]);
 
         await Notifications.scheduleNotificationAsync({
             content: {
                 title: 'Reminder',
                 body: 'Tap to listen to your reminder',
-                data: {uri: reminderUri},
+                data: { uri: reminderUri },
             },
-            trigger: {date: time.getTime()},
+            trigger: { date: time.getTime() },
         });
 
-        // Alert.alert('Reminder scheduled!');
-        setReminderUri(null); // Reset reminderUri after scheduling
+        setReminderUri(null);
+    };
+
+    const showPicker = () => {
+        setShowTimePicker(true);
     };
 
     const onChange = (event, selectedTime) => {
         const currentTime = selectedTime || time;
-        setShowTimePicker(Platform.OS === 'ios');
+        setShowTimePicker(false); // Close DateTimePicker after picking time
         setTime(currentTime);
     };
 
-    const renderReminder = ({item, index}) => (
-        <View style={[styles.reminder, isDarkMode ? styles.darkReminder : styles.lightReminder]}>
-            <Text>Reminder {index + 1}:</Text>
-            <Text>Time: {new Date(item.time).toLocaleTimeString()}</Text>
-            <PlayAudio uri={item.uri}/>
+    const handleRemoveReminder = async (index) => {
+        const updatedReminders = [...reminders];
+        const removedReminder = updatedReminders.splice(index, 1)[0];
+        setReminders(updatedReminders);
+
+        // Assuming you store the reminders in AsyncStorage with a key 'reminders'
+        try {
+            const storedReminders = await AsyncStorage.getItem('reminders');
+            if (storedReminders) {
+                const parsedReminders = JSON.parse(storedReminders);
+                const filteredReminders = parsedReminders.filter(
+                    (reminder) => reminder.uri !== removedReminder.uri
+                );
+                await AsyncStorage.setItem('reminders', JSON.stringify(filteredReminders));
+            }
+        } catch (error) {
+            console.error('Failed to remove reminder from storage:', error);
+        }
+    };
+
+    const renderReminder = ({ item, index }) => (
+        <View style={styles.reminder}>
+            <Text style={styles.reminderText}>{index + 1}. </Text>
+            <Text style={styles.reminderText}>{formatTime(item.time)}</Text>
+            <View style={styles.audioInfo}>
+                <PlayAudio uri={item.uri} />
+            </View>
+            <View style={styles.actions}>
+                <TouchableOpacity onPress={() => handleRemoveReminder(index)} style={styles.deleteButton}>
+                    <Ionicons name="close-circle" size={24} color="red" />
+                </TouchableOpacity>
+            </View>
         </View>
     );
-    const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
     return (
-        <>
+        <View style={styles.container}>
             <View style={styles.topMenu}>
-                <Text style={styles.topMenuText}>voice <Ionicons name="checkmark-circle" size={32} color="white"/> book</Text>
+                <Text style={styles.topMenuText}>Voice <Ionicons name="checkmark-circle" size={32} color="white" /> Book</Text>
                 <Switch
-                    trackColor={{ false: "#767577", true: "#81b0ff" }}
-                    thumbColor={isDarkMode ? "#f5dd4b" : "#f4f3f4"}
+                    trackColor={{ false: "#3b3a3b", true: "#d6e5df" }}
+                    thumbColor={isDarkMode ? "#435b5b" : "#c6d0d0"}
                     ios_backgroundColor="#3e3e3e"
                     onValueChange={toggleTheme}
                     value={isDarkMode}
                 />
             </View>
-
-            <View style={styles.container}>
+            <View style={styles.content}>
                 <View style={styles.recordPlayContainer}>
-                    <RecordAudio onSave={handleSaveRecording}/>
-                    {reminderUri && <PlayAudio uri={reminderUri}/>}
+                    <RecordAudio onSave={handleSaveRecording} />
+                    {reminderUri && <PlayAudio uri={reminderUri} />}
                 </View>
                 {showTimePicker && (
                     <DateTimePicker
@@ -107,118 +162,31 @@ export default function App() {
                     />
                 )}
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.roundButton} onPress={() => setShowTimePicker(true)}>
+                    <TouchableOpacity style={styles.button} onPress={showPicker}>
                         <Text style={styles.buttonText}>Pick Time</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.roundButton} onPress={handleScheduleReminder}>
+                    <TouchableOpacity style={styles.button} onPress={handleScheduleReminder}>
                         <Text style={styles.buttonText}>Schedule Reminder</Text>
                     </TouchableOpacity>
                 </View>
+
                 <FlatList
-                    data={reminders}
-                    keyExtractor={(item, index) => index.toString()}
+                    data={reminders.map((item, index) => ({
+                        ...item,
+                        key: index.toString(),
+                    }))}
+                    keyExtractor={(item) => item.key}
                     renderItem={renderReminder}
                 />
             </View>
-        </>
+        </View>
+    );
+};
+
+export default function App() {
+    return (
+        <ThemeProvider>
+            <AppContent />
+        </ThemeProvider>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#ecf0f1',
-        padding: 20,
-        marginTop: 20
-    },
-    darkContainer: {
-        backgroundColor: '#2c3e50',
-    },
-    recordPlayContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: '100%',
-        marginTop: 20,
-    },
-    buttonContainer: {
-        color: 'gray',
-        borderRadius: 4,
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: '100%',
-        marginTop: 20,
-    },
-    roundButton: {
-        borderRightWidth: 2,
-        borderBottomWidth: 2,
-        backgroundColor: '#f5f6f6',
-        padding: 5,
-        borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 150,
-    },
-    buttonText: {
-        color: 'teal',
-        fontSize: 16,
-        fontWeight: 'semibold',
-        fontFamily: 'Roboto',
-    },
-    lightReminder: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 20,
-        padding: 10,
-        borderRadius: 5,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        width: '100%',
-    },
-    darkReminder: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 20,
-        padding: 10,
-        borderRadius: 5,
-        borderWidth: 1,
-        borderColor: 'white',
-        textDecorationColor:'white',
-        width: '100%',
-        backgroundColor: '#34495e'
-    },
-    scheduledTime: {
-        marginTop: 20,
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    topMenu: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingTop: 40,
-
-        paddingBottom: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-        backgroundColor: '#5f8381',
-        width: '100%',
-        marginBottom: 10,
-    },
-    topMenuText: {
-        fontSize: 20,
-        fontWeight: 'condensed',
-        fontFamily: 'Roboto',
-        color: 'white',
-    },
-
-});
-
-
-
-
