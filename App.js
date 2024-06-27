@@ -7,7 +7,9 @@ import RecordAudio from './components/record/recordAudio';
 import PlayAudio from './components/play/playAudio';
 import { ThemeProvider, useTheme } from './ThemeContext';
 import { lightStyles, darkStyles } from './App.styles';
-import { formatTime } from './util'; // Adjust the path as necessary
+import { formatTime } from './util';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
         shouldShowAlert: true,
@@ -36,8 +38,31 @@ const AppContent = () => {
         })();
     }, []);
 
-    const handleSaveRecording = (uri) => {
+    useEffect(() => {
+        // Load stored reminders from AsyncStorage on component mount
+        loadStoredReminders();
+    }, []);
+
+    const handleSaveRecording = async (uri) => {
         setReminderUri(uri);
+        // Save recorded URI to AsyncStorage
+        try {
+            await AsyncStorage.setItem('@stored_reminder_uris', JSON.stringify([...reminders, uri]));
+        } catch (error) {
+            console.error('Error saving reminder URI:', error);
+        }
+    };
+
+    const loadStoredReminders = async () => {
+        // Load stored reminders from AsyncStorage
+        try {
+            const storedURIs = await AsyncStorage.getItem('@stored_reminder_uris');
+            if (storedURIs !== null) {
+                setReminders(JSON.parse(storedURIs));
+            }
+        } catch (error) {
+            console.error('Error loading reminders:', error);
+        }
     };
 
     const handleScheduleReminder = async () => {
@@ -75,10 +100,24 @@ const AppContent = () => {
         setTime(currentTime);
     };
 
-    const handleRemoveReminder = (index) => {
+    const handleRemoveReminder = async (index) => {
         const updatedReminders = [...reminders];
-        updatedReminders.splice(index, 1);
+        const removedReminder = updatedReminders.splice(index, 1)[0];
         setReminders(updatedReminders);
+
+        // Assuming you store the reminders in AsyncStorage with a key 'reminders'
+        try {
+            const storedReminders = await AsyncStorage.getItem('reminders');
+            if (storedReminders) {
+                const parsedReminders = JSON.parse(storedReminders);
+                const filteredReminders = parsedReminders.filter(
+                    (reminder) => reminder.uri !== removedReminder.uri
+                );
+                await AsyncStorage.setItem('reminders', JSON.stringify(filteredReminders));
+            }
+        } catch (error) {
+            console.error('Failed to remove reminder from storage:', error);
+        }
     };
 
     const renderReminder = ({ item, index }) => (
@@ -132,10 +171,11 @@ const AppContent = () => {
                 </View>
 
                 <FlatList
-                    data={reminders.map((item) => ({
+                    data={reminders.map((item, index) => ({
                         ...item,
+                        key: index.toString(),
                     }))}
-                    keyExtractor={(item, index) => index.toString()}
+                    keyExtractor={(item) => item.key}
                     renderItem={renderReminder}
                 />
             </View>
