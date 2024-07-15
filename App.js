@@ -28,33 +28,27 @@ const AppContent = () => {
     const styles = isDarkMode ? darkStyles : lightStyles;
 
     useEffect(() => {
-        (async () => {
+        const requestNotificationPermissions = async () => {
             const { status } = await Notifications.requestPermissionsAsync();
             if (status !== 'granted') {
                 Alert.alert('Permission not granted for notifications!');
             } else {
                 setNotificationPermissionGranted(true);
             }
-        })();
+        };
+
+        requestNotificationPermissions();
     }, []);
 
     useEffect(() => {
-        // Load stored reminders from AsyncStorage on component mount
         loadStoredReminders();
     }, []);
 
     const handleSaveRecording = async (uri) => {
         setReminderUri(uri);
-        // Save recorded URI to AsyncStorage
-        try {
-            await AsyncStorage.setItem('@stored_reminder_uris', JSON.stringify([...reminders, uri]));
-        } catch (error) {
-            console.error('Error saving reminder URI:', error);
-        }
     };
 
     const loadStoredReminders = async () => {
-        // Load stored reminders from AsyncStorage
         try {
             const storedURIs = await AsyncStorage.getItem('@stored_reminder_uris');
             if (storedURIs !== null) {
@@ -76,7 +70,14 @@ const AppContent = () => {
         }
 
         const newReminder = { uri: reminderUri, time };
-        setReminders([...reminders, newReminder]);
+        const updatedReminders = [...reminders, newReminder];
+        setReminders(updatedReminders);
+
+        try {
+            await AsyncStorage.setItem('@stored_reminder_uris', JSON.stringify(updatedReminders));
+        } catch (error) {
+            console.error('Failed to save reminders to storage:', error);
+        }
 
         await Notifications.scheduleNotificationAsync({
             content: {
@@ -84,7 +85,7 @@ const AppContent = () => {
                 body: 'Tap to listen to your reminder',
                 data: { uri: reminderUri },
             },
-            trigger: { date: time.getTime() },
+            trigger: { date: time },
         });
 
         setReminderUri(null);
@@ -96,27 +97,19 @@ const AppContent = () => {
 
     const onChange = (event, selectedTime) => {
         const currentTime = selectedTime || time;
-        setShowTimePicker(false); // Close DateTimePicker after picking time
+        setShowTimePicker(false);
         setTime(currentTime);
     };
 
     const handleRemoveReminder = async (index) => {
         const updatedReminders = [...reminders];
-        const removedReminder = updatedReminders.splice(index, 1)[0];
+        updatedReminders.splice(index, 1);
         setReminders(updatedReminders);
 
-        // Assuming you store the reminders in AsyncStorage with a key 'reminders'
         try {
-            const storedReminders = await AsyncStorage.getItem('reminders');
-            if (storedReminders) {
-                const parsedReminders = JSON.parse(storedReminders);
-                const filteredReminders = parsedReminders.filter(
-                    (reminder) => reminder.uri !== removedReminder.uri
-                );
-                await AsyncStorage.setItem('reminders', JSON.stringify(filteredReminders));
-            }
+            await AsyncStorage.setItem('@stored_reminder_uris', JSON.stringify(updatedReminders));
         } catch (error) {
-            console.error('Failed to remove reminder from storage:', error);
+            console.error('Failed to update reminders in storage:', error);
         }
     };
 
@@ -138,7 +131,7 @@ const AppContent = () => {
     return (
         <View style={styles.container}>
             <View style={styles.topMenu}>
-                <Text style={styles.topMenuText}>Voice <Ionicons name="checkmark-circle" size={32} color="white" /> Book</Text>
+                <Text style={styles.topMenuText}>Todayly <Ionicons name="checkmark-circle" size={32} color="white" /> </Text>
                 <Switch
                     trackColor={{ false: "#3b3a3b", true: "#d6e5df" }}
                     thumbColor={isDarkMode ? "#435b5b" : "#c6d0d0"}
@@ -148,34 +141,38 @@ const AppContent = () => {
                 />
             </View>
             <View style={styles.content}>
-                <View style={styles.recordPlayContainer}>
-                    <RecordAudio onSave={handleSaveRecording} />
-                    {reminderUri && <PlayAudio uri={reminderUri} />}
-                </View>
-                {showTimePicker && (
-                    <DateTimePicker
-                        value={time}
-                        mode="time"
-                        is24Hour={true}
-                        display="default"
-                        onChange={onChange}
-                    />
-                )}
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={showPicker}>
-                        <Text style={styles.buttonText}>Pick Time</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={handleScheduleReminder}>
-                        <Text style={styles.buttonText}>Schedule Reminder</Text>
-                    </TouchableOpacity>
+                <View style={styles.transport}>
+                    <View style={styles.buttonContainer}>
+                        <RecordAudio onSave={handleSaveRecording} />
+                        <TouchableOpacity style={styles.button} onPress={showPicker}>
+                            <Text style={styles.buttonText}>Pick <Ionicons name="time-outline" size={24} color="orange" /> Time</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {reminderUri && (
+                        <View style={styles.buttonContainer}>
+                            <Text style={styles.reminderText}>Recorded:</Text>
+                            <PlayAudio uri={reminderUri} />
+                            <TouchableOpacity style={styles.button} onPress={handleScheduleReminder}>
+                                <Text style={styles.buttonText}><Ionicons name="add-outline" size={24} color="orange" />Schedule as reminder</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
 
+                <View>
+                    {showTimePicker && (
+                        <DateTimePicker
+                            value={time}
+                            mode="time"
+                            is24Hour={true}
+                            display="default"
+                            onChange={onChange}
+                        />
+                    )}
+                </View>
                 <FlatList
-                    data={reminders.map((item, index) => ({
-                        ...item,
-                        key: index.toString(),
-                    }))}
-                    keyExtractor={(item) => item.key}
+                    data={reminders}
+                    keyExtractor={(item, index) => index.toString()}
                     renderItem={renderReminder}
                 />
             </View>
@@ -183,10 +180,12 @@ const AppContent = () => {
     );
 };
 
-export default function App() {
+const App = () => {
     return (
         <ThemeProvider>
             <AppContent />
         </ThemeProvider>
     );
-}
+};
+
+export default App;

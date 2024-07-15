@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "NoiceBook",
+    "name": "Todaily ⟡ Prompts",
     "slug": "your-app-slug",
     "version": "1.0.1",
     "platforms": ["ios", "android"],
     "android": {
-      "package": "com.yourcompany.yourapp",
+      "package": "com.armasconi.todayly",
       "permissions": ["CAMERA", "RECORD_AUDIO", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
     },
     "ios": {
-      "bundleIdentifier": "com.yourcompany.yourapp",
+      "bundleIdentifier": "com.armasconi.todayly",
       "infoPlist": {
         "UIBackgroundModes": ["audio", "fetch", "remote-notification"],
         "NSCameraUsageDescription": "This app requires access to the camera.",

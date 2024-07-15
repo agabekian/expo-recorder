@@ -7,6 +7,7 @@ const PlayAudio = ({ uri }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [elapsedTime, setElapsedTime] = useState('00:00');
     const [duration, setDuration] = useState('00:00');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const loadSound = async () => {
@@ -38,33 +39,37 @@ const PlayAudio = ({ uri }) => {
                         setElapsedTime(formatTime(status.positionMillis));
                     } else if (status.didJustFinish || status.positionMillis >= status.durationMillis) {
                         setIsPlaying(false);
-                        await sound.unloadAsync();
-                        setSound(null);
                         setElapsedTime('00:00');
                     }
                 }
             }
         };
 
-        const interval = setInterval(checkPlaybackStatus, 500); // Check every 500ms
+        const interval = setInterval(checkPlaybackStatus, 500);
         return () => clearInterval(interval);
     }, [sound]);
 
     const playAudio = async () => {
         try {
+            if (isLoading) return;
+            setIsLoading(true);
+
             if (sound) {
-                await sound.unloadAsync();
-                setSound(null);
-                setIsPlaying(false);
-                setElapsedTime('00:00');
-            } else {
-                const { sound: newSound } = await Audio.Sound.createAsync({ uri });
-                setSound(newSound);
-                await newSound.playAsync();
-                setIsPlaying(true);
+                if (isPlaying) {
+                    await sound.stopAsync();
+                    setIsPlaying(false);
+                    setElapsedTime('00:00');
+                } else {
+                    await sound.setPositionAsync(0);
+                    await sound.playAsync();
+                    setIsPlaying(true);
+                }
             }
+
+            setIsLoading(false);
         } catch (error) {
             console.log('Error playing audio:', error);
+            setIsLoading(false);
         }
     };
 
@@ -86,8 +91,10 @@ const PlayAudio = ({ uri }) => {
 const styles = StyleSheet.create({
     playButton: {
         flexDirection: 'row',
-        width: 90,
+        width: 148,
         height: 60,
+        borderBottomWidth: 2,
+        borderRightWidth: 2,
         borderRadius: 10,
         backgroundColor: '#50a965',
         alignItems: 'center',
@@ -113,7 +120,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         transform: [{ rotate: '45deg' }],
     },
-
     elapsedTime: {
         marginTop: 5,
         color: 'white',

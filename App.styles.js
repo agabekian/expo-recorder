@@ -38,11 +38,17 @@ const baseStyles = {
 
     buttonContainer: {
         borderRadius: 4,
+        borderWidth: 1,
+        padding:10,
+        marginRight:5
+    },
+    transport: {
+        display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: '100%',
-        marginTop: 45,
-        marginBottom: 10,
+        borderRadius: 4,
+        borderWidth: 1,
+        padding:10,
+        marginRight:5
     },
 
     button: {
@@ -53,6 +59,7 @@ const baseStyles = {
         alignItems: 'center',
         justifyContent: 'center',
         width: 150,
+        margin:8,
     },
 
     buttonText: {
