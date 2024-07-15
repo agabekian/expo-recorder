@@ -7,7 +7,7 @@ const PlayAudio = ({ uri }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [elapsedTime, setElapsedTime] = useState('00:00');
     const [duration, setDuration] = useState('00:00');
-    const [isLoading, setIsLoading] = useState(false); // Track loading state
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const loadSound = async () => {
@@ -45,22 +45,22 @@ const PlayAudio = ({ uri }) => {
             }
         };
 
-        const interval = setInterval(checkPlaybackStatus, 500); // Check every 500ms
+        const interval = setInterval(checkPlaybackStatus, 500);
         return () => clearInterval(interval);
     }, [sound]);
 
     const playAudio = async () => {
         try {
-            if (isLoading) return; // Prevent overlapping play requests
+            if (isLoading) return;
             setIsLoading(true);
 
             if (sound) {
                 if (isPlaying) {
-                    await sound.stopAsync(); // Stop playback if already playing
+                    await sound.stopAsync();
                     setIsPlaying(false);
                     setElapsedTime('00:00');
                 } else {
-                    await sound.setPositionAsync(0); // Rewind to the beginning
+                    await sound.setPositionAsync(0);
                     await sound.playAsync();
                     setIsPlaying(true);
                 }
