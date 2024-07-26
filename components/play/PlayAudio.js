@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, StyleSheet, View, Text } from 'react-native';
 import { Audio } from 'expo-av';
 
-const PlayAudio = ({ uri }) => {
+const PlayAudio = ({ uri, dateRecorded }) => {
     const [sound, setSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [elapsedTime, setElapsedTime] = useState('00:00');
     const [duration, setDuration] = useState('00:00');
     const [isLoading, setIsLoading] = useState(false);
+    const [showInfo, setShowInfo] = useState(false);
 
     useEffect(() => {
         const loadSound = async () => {
@@ -81,10 +82,16 @@ const PlayAudio = ({ uri }) => {
     };
 
     return (
-        <TouchableOpacity style={styles.playButton} onPress={playAudio}>
-            <View style={[styles.triangle, isPlaying && styles.stopTriangle]} />
-            <Text style={styles.elapsedTime}>{isPlaying ? elapsedTime : duration}</Text>
-        </TouchableOpacity>
+        <View>
+            <TouchableOpacity style={styles.playButton} onPress={playAudio}>
+                <View style={[styles.triangle, isPlaying && styles.stopTriangle]} />
+                <Text style={styles.elapsedTime}>{isPlaying ? elapsedTime : duration}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.infoButton} onPress={() => setShowInfo(!showInfo)}>
+                <Text style={styles.infoText}>Info</Text>
+            </TouchableOpacity>
+            {showInfo && <Text style={styles.infoText}>Recorded on: {dateRecorded}</Text>}
+        </View>
     );
 };
 
@@ -123,6 +130,14 @@ const styles = StyleSheet.create({
     elapsedTime: {
         marginTop: 5,
         color: 'white',
+        fontSize: 12,
+    },
+    infoButton: {
+        marginTop: 10,
+        alignItems: 'center',
+    },
+    infoText: {
+        color: '#fff',
         fontSize: 12,
     },
 });

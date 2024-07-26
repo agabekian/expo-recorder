@@ -7,7 +7,7 @@ import RecordAudio from './components/record/RecordAudio';
 import PlayAudio from './components/play/PlayAudio';
 import { ThemeProvider, useTheme } from './ThemeContext';
 import { lightStyles, darkStyles } from './App.styles';
-import { formatTime, formatFullDateTime } from './util';
+import { formatFullDateTime } from './util';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 Notifications.setNotificationHandler({
@@ -127,9 +127,10 @@ const App = () => {
 
     const renderReminder = ({ item, index }) => (
         <View style={styles.reminder}>
-            <Text style={styles.reminderText}>{index + 1}. {formatFullDateTime(item.time)}</Text>
+            <Text style={styles.reminderText}>{index + 1}. </Text>
+            <Text style={styles.reminderText}>{formatFullDateTime(item.time)}</Text>
             <View style={styles.audioInfo}>
-                <PlayAudio uri={item.uri} />
+                <PlayAudio uri={item.uri} dateRecorded={new Date(item.time).toLocaleString()} />
             </View>
             <View style={styles.actions}>
                 <TouchableOpacity onPress={() => handleRemoveReminder(index)} style={styles.deleteButton}>
