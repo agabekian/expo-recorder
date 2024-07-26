@@ -17,9 +17,9 @@ Tap "Pick Time" to select the desired time for your reminder using the date and 
 Once selected, tap "Schedule Reminder" to save and schedule your reminder.
 You will receive a notification at the scheduled time to listen to your reminder.
 
-Switching Themes:
+**Themes:**
 
-Toggle the switch at the top right corner to switch between dark and light themes.
+Toggle (top right corner) to switch between dark and light themes.
 
 #### Screenshot
 ![img.png](img.png)
