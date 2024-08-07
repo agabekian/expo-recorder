@@ -16,6 +16,6 @@ export const formatFullDateTime = (dateTime) => {
     const minutes = date.getMinutes().toString().padStart(2, '0'); // Get minutes and pad with zero if needed
     const seconds = date.getSeconds().toString().padStart(2, '0'); // Get seconds and pad with zero if needed
 
-    return `${month}/${day}/${year} ${hours}:${minutes}`;
+    return `${month}.${day}.${year} ${hours}:${minutes}`;
 };
 
