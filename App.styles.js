@@ -83,6 +83,9 @@ const baseStyles = {
     reminderText: {
         fontSize: 16,
     },
+    dateText1: {
+        fontSize: 12,
+    },
 
     deleteButton: {
         marginLeft: 'auto', // Push delete button to the right
