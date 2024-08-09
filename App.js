@@ -133,7 +133,7 @@ const App = () => {
             </TouchableOpacity>
 
             <View style={styles.audioInfo}>
-                <PlayAudio uri={item.uri} dateRecorded={new Date(item.time).toLocaleString()}/>
+                <PlayAudio uri={item.uri}/>
                 {/*actual play button etc*/}
             </View>
             <View style={styles.actions}>
@@ -175,8 +175,10 @@ const App = () => {
                             <Text style={styles.reminderText}>Recorded:</Text>
                             <PlayAudio uri={reminderUri}/>
                             <TouchableOpacity style={styles.button} onPress={handleScheduleReminder}>
-                                <Text style={styles.buttonText}><Ionicons name="add-outline" size={24}
-                                                                          color="orange"/> Schedule as reminder</Text>
+                                <Text style={styles.buttonText}><Ionicons name="add-outline"
+                                                                          size={24}
+                                                                          color="orange"/>
+                                    Schedule as reminder</Text>
                             </TouchableOpacity>
                         </View>
                     )}

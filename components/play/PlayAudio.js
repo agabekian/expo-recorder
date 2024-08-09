@@ -8,7 +8,6 @@ const PlayAudio = ({ uri, dateRecorded }) => {
     const [elapsedTime, setElapsedTime] = useState('00:00');
     const [duration, setDuration] = useState('00:00');
     const [isLoading, setIsLoading] = useState(false);
-    const [showInfo, setShowInfo] = useState(false);
 
     useEffect(() => {
         const loadSound = async () => {
@@ -87,10 +86,7 @@ const PlayAudio = ({ uri, dateRecorded }) => {
                 <View style={[styles.triangle, isPlaying && styles.stopTriangle]} />
                 <Text style={styles.elapsedTime}>{isPlaying ? elapsedTime : duration}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.infoButton} onPress={() => setShowInfo(!showInfo)}>
-                <Text style={styles.infoText}>Info</Text>
-            </TouchableOpacity>
-            {showInfo && <Text style={styles.infoText}>Recorded on: {dateRecorded}</Text>}
+
         </View>
     );
 };
