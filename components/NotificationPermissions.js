@@ -1,4 +1,3 @@
-// components/NotificationPermissions.js
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import * as Notifications from 'expo-notifications';
