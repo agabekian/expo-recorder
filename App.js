@@ -9,6 +9,7 @@ import { lightStyles, darkStyles } from './App.styles';
 import { formatFullDateTime } from './util';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePickers from './components/DateTimePickers';
+import NotificationPermissions from './components/NotificationPermissions';
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -26,19 +27,6 @@ const App = () => {
     const [notificationPermissionGranted, setNotificationPermissionGranted] = useState(false);
     const { isDarkMode, toggleTheme } = useTheme();
     const styles = isDarkMode ? darkStyles : lightStyles;
-
-    useEffect(() => {
-        const requestNotificationPermissions = async () => {
-            const { status } = await Notifications.requestPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Permission not granted for notifications!');
-            } else {
-                setNotificationPermissionGranted(true);
-            }
-        };
-
-        requestNotificationPermissions();
-    }, []);
 
     useEffect(() => {
         loadStoredReminders();
@@ -127,6 +115,7 @@ const App = () => {
 
     return (
         <View style={{ flex: 1 }}>
+            <NotificationPermissions onPermissionGranted={setNotificationPermissionGranted} />
             <View style={styles.topMenu}>
                 <Text style={styles.topMenuText}>Todayly <Ionicons name="checkmark-circle" size={32} color="white" /></Text>
                 <Switch
