@@ -22,6 +22,7 @@ const App = () => {
     const [reminderUri, setReminderUri] = useState(null);
     const [date, setDate] = useState(new Date());
     const [time, setTime] = useState(new Date());
+    const [origin, setOrigin] = useState("11.11");
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [reminders, setReminders] = useState([]);
@@ -71,7 +72,11 @@ const App = () => {
         reminderTime.setHours(time.getHours());
         reminderTime.setMinutes(time.getMinutes());
 
-        const newReminder = {uri: reminderUri, time: reminderTime};
+        const newReminder = {
+            uri: reminderUri,
+            time: reminderTime,
+            origin: time,
+        };
         const updatedReminders = [...reminders, newReminder];
         setReminders(updatedReminders);
 
@@ -127,13 +132,13 @@ const App = () => {
 
     const renderReminder = ({item, index}) => (
         <View style={styles.reminder}>
-            <TouchableOpacity onPress={() => alert("DUDE!")}>
+            <TouchableOpacity onPress={() => Alert.alert("Info",`origin: ${formatFullDateTime(item.origin)}`)}>
                 <Text style={styles.reminderText}>{index + 1}. </Text>
                 <Text style={styles.dateText1}>{formatFullDateTime(item.time)}</Text>
             </TouchableOpacity>
 
             <View style={styles.audioInfo}>
-                <PlayAudio uri={item.uri}/>
+                <PlayAudio uri={item.uri} dateRecorded={new Date(item.time).toLocaleString()}/>
                 {/*actual play button etc*/}
             </View>
             <View style={styles.actions}>
@@ -175,10 +180,8 @@ const App = () => {
                             <Text style={styles.reminderText}>Recorded:</Text>
                             <PlayAudio uri={reminderUri}/>
                             <TouchableOpacity style={styles.button} onPress={handleScheduleReminder}>
-                                <Text style={styles.buttonText}><Ionicons name="add-outline"
-                                                                          size={24}
-                                                                          color="orange"/>
-                                    Schedule as reminder</Text>
+                                <Text style={styles.buttonText}><Ionicons name="add-outline" size={24}
+                                                                          color="orange"/> Schedule as reminder</Text>
                             </TouchableOpacity>
                         </View>
                     )}

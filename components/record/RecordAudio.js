@@ -4,8 +4,8 @@ import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RecordAudio = ({ onSave }) => {
-    const [recording, setRecording] = useState(null);
     const [hasPermission, setHasPermission] = useState(null);
+    const [recording, setRecording] = useState(null);
     const [recordingDuration, setRecordingDuration] = useState(0);
     const [intervalId, setIntervalId] = useState(null);
 
@@ -31,13 +31,10 @@ const RecordAudio = ({ onSave }) => {
         loadRecordingState();
     }, []);
 
+    //TIMER:
     useEffect(() => {
-        if (recording) {
-            startRecordingInterval();
-        } else {
-            clearInterval(intervalId);
-        }
-
+        if (recording) startRecordingInterval();
+        else clearInterval(intervalId);
         return () => clearInterval(intervalId);
     }, [recording]);
 
